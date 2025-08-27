@@ -169,7 +169,7 @@ if st.button("▶️ Run") and uploaded:
         # nhiều file → gom zip
         zip_buffer = BytesIO()
         with zipfile.ZipFile(zip_buffer, "w") as zipf:
-            for f in uploaded:s
+            for f in uploaded:
                 out = process_excel(f, data_map)
                 fname = f.name.replace(".xlsx", "_checked.xlsx")
                 zipf.writestr(fname, out.getvalue())
