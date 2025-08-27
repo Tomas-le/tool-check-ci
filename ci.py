@@ -102,8 +102,13 @@ def process_excel(file, data_map):
     delta = new_data_len - old_data_len
     if delta > 0:
         ws.insert_rows(footer_start-1, amount=delta)
+        footer_start += delta
     elif delta < 0:
         ws.delete_rows(idx=DATA_START + new_data_len, amount=-delta)
+        footer_start += delta   # delta < 0 nên dịch ngược lên
+
+    # cập nhật lại total_row sau khi insert/delete
+    total_row = footer_start - 1
 
     # ghi lại data mới
     for i, r in enumerate(new_rows):
@@ -129,8 +134,7 @@ def process_excel(file, data_map):
     border = Border(left=thin, right=thin, top=thin, bottom=thin)
     fill_yellow = PatternFill(fill_type="solid", fgColor="FFF2CC")
 
-    total_row = footer_start-1   # dòng TOTAL gốc
-    for r in range(DATA_HEADER_ROW, total_row+1):   # 👉 bắt đầu từ HEADER (row 10)
+    for r in range(DATA_HEADER_ROW, total_row+1):   # 👉 bao trọn hết cả data mới
         for c in range(1, 8):
             cell = ws.cell(r, c)
             cell.border = border
@@ -148,19 +152,32 @@ st.title("Tool check CI")
 uploaded = st.file_uploader("Upload Excel (.xlsx)", type="xlsx", accept_multiple_files=True)
 data_map = load_data_from_gsheet()
 
-if uploaded:
-    zip_buffer = BytesIO()
-    with zipfile.ZipFile(zip_buffer, "w") as zipf:
-        for f in uploaded:
-            out = process_excel(f, data_map)
-            fname = f.name.replace(".xlsx", "_checked.xlsx")
-            zipf.writestr(fname, out.getvalue())
-    zip_buffer.seek(0)
+# nút Run
+if st.button("▶️ Run") and uploaded:
+    if len(uploaded) == 1:
+        # chỉ 1 file → xuất thẳng file excel
+        f = uploaded[0]
+        out = process_excel(f, data_map)
+        fname = f.name.replace(".xlsx", "_checked.xlsx")
+        st.download_button(
+            label="⬇️ Download Excel",
+            data=out,
+            file_name=fname,
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    else:
+        # nhiều file → gom zip
+        zip_buffer = BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w") as zipf:
+            for f in uploaded:s
+                out = process_excel(f, data_map)
+                fname = f.name.replace(".xlsx", "_checked.xlsx")
+                zipf.writestr(fname, out.getvalue())
+        zip_buffer.seek(0)
 
-    st.download_button(
-        label="📦 Download All (ZIP)",
-        data=zip_buffer,
-        file_name="checked_files.zip",
-        mime="application/zip"
-
-    )
+        st.download_button(
+            label="📦 Download All (ZIP)",
+            data=zip_buffer,
+            file_name="checked_files.zip",
+            mime="application/zip"
+        )
