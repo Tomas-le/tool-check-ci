@@ -20,7 +20,6 @@ def safe_float(x):
     except:
         return 0.0
 
-@st.cache_data
 def load_data_from_gsheet():
     url = "https://docs.google.com/spreadsheets/d/1sLEMyyTbjumWn5TpYV6cZKxsUO5l10umZSqIYByU_Bk/export?format=csv&gid=2043981257"
     df = pd.read_csv(url, dtype=str).fillna("")
@@ -163,4 +162,5 @@ if uploaded:
         data=zip_buffer,
         file_name="checked_files.zip",
         mime="application/zip"
+
     )
