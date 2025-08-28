@@ -127,7 +127,7 @@ def process_excel(file, data_map):
     HEADERS = [
         "PO", "SKU", "ASIN", "DESCRIPTION",
         "QUANTITY", "UNIT PRICE (USD)", "AMOUNT",
-        "weight_steel", "weight_alu"
+        "Unit_weight_steel", "Unit_weight_alu"
     ]
     for c, name in enumerate(HEADERS, start=1):
         cell = ws.cell(DATA_HEADER_ROW, c, value=name)
